@@ -1,0 +1,27 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b && node ./dist/index.js",
+    "watch": "nodemon --exec ts-node ./src/index.ts",
+    "start": "tsc -b && node ./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@clerk/backend": "^1.9.2",
+    "bullmq": "^5.12.14",
+    "express": "latest"
+  },
+  "devDependencies": {
+    "@types/express": "latest",
+    "dotenv": "^16.4.5",
+    "nodemon": "latest",
+    "ts-node": "latest",
+    "typescript": "latest"
+  }
+}

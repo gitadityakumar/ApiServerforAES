@@ -6,10 +6,9 @@ import { Job } from 'bullmq';
 // Enqueue video processing job
 export const processVideo = async (req: Request, res: Response) => {
   try {
-    const videoData = req.body.videoData;
-    
+    const videoData = req.body.videoData;    
     if (!videoData || !videoData.userId) {
-         return res.status(400).send('Bad Request: Missing video data or userID');
+        return res.status(400).send('Bad Request: Missing video data or userID');
     }
     // auth 
     const id = videoData.userId;
@@ -18,13 +17,20 @@ export const processVideo = async (req: Request, res: Response) => {
         return res.status(401).send('Unauthorized');
     }
 
+    
+    
     // Add a job to the queue
-    const job = await jobQueue.add('video-job', {
-      videoData
-    });
+    const job = await jobQueue.add('video-job',
+      {
+        videoData
+      },
+      {
+        removeOnComplete: true
+      }
+  );
 
     return res.status(200).json({
-      message: 'Job enqueued successfully!',
+      message: 'Video submitted for processing, pending validation!',
       jobId: job.id,
     });
   } catch (err) {
@@ -114,3 +120,4 @@ export default {
   healthCheck,
   // processVideo,
 };
+

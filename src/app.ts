@@ -11,7 +11,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Use the subtitles routes
-app.use('/api', subtitlesRoutes);
+app.use('/api/v1', subtitlesRoutes);
 
 // Error-handling middleware (optional)
 //@ts-ignore

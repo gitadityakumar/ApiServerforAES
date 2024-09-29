@@ -6,7 +6,13 @@ import { Job } from 'bullmq';
 // Enqueue video processing job
 export const processVideo = async (req: Request, res: Response) => {
   try {
-    const videoData = req.body.videoData;    
+    const Data = req.body.videoData; 
+    const videoData = Data[0];
+  
+    // console.log(videoData);
+    const rawData = req.body;
+    console.log(rawData);
+    // console.log(rawData);   
     if (!videoData || !videoData.userId) {
         return res.status(400).send('Bad Request: Missing video data or userID');
     }

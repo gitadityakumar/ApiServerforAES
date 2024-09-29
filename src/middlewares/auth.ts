@@ -1,4 +1,5 @@
 import { createClerkClient } from '@clerk/backend';
+import { verifyToken } from '@clerk/backend/dist/tokens/verify';
 import dotenv from 'dotenv';
 
 dotenv.config();

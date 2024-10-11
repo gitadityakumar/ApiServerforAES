@@ -30,7 +30,10 @@ export const processVideo = async (req: Request, res: Response) => {
         model:model
       },
       {
-        removeOnComplete: true,
+        removeOnComplete: {
+          age:200,
+          count:1000,
+        },
       }
     );
 
@@ -50,65 +53,77 @@ export const getJobStatus = async (req: Request, res: Response) => {
 
   try {
     const job = await jobQueue.getJob(jobId);
-    // console.log(job);
 
+    // Check if the job exists
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // Get job progress and status
+    // Get job progress and state
     const jobState = await job.getState();
     const jobProgress = job.progress;
-    console.log(jobProgress);
-    console.log(jobState);
 
-    if (jobState === "active") {
-      const result = await job.returnvalue;
-      return res.status(200).json({
-        jobId,
-        status: jobState,
-        progress: jobProgress,
-        result,
-      });
-    }
-
-    if (jobState === "completed") {
-      const result = await job.returnvalue;
-      return res.status(200).json({
-        jobId,
-        status: jobState,
-        progress: jobProgress,
-        result,
-      });
-    }
-
-    if (jobState === "failed") {
-      return res.status(500).json({
-        jobId,
-        status: jobState,
-        error: job.failedReason,
-      });
-    }
-
-    // Handle cancelled jobs
-    if (jobState === "unknown") {
-      return res.status(200).json({
-        jobId,
-        status: "cancelled",
-        message: "Job was cancelled or removed",
-      });
-    }
-    // For 'waiting', 'active', or 'delayed'
-    return res.status(200).json({
+    // Common response structure
+    const response = {
       jobId,
       status: jobState,
       progress: jobProgress,
-    });
+    };
+
+    // Handle the different job states
+    switch (jobState) {
+      case "waiting":
+        return res.status(200).json({
+          ...response,
+          message: "Job is in the queue, waiting to be processed.",
+        });
+
+      case "active":
+        return res.status(200).json({
+          ...response,
+          message: "Job is actively being processed.",
+        });
+
+      case "completed":
+        const result = await job.returnvalue;
+        return res.status(200).json({
+          ...response,
+          result,
+          message: "Job has been completed successfully.",
+        });
+
+      case "failed":
+        return res.status(500).json({
+          ...response,
+          error: job.failedReason,
+          message: "Job has failed.",
+        });
+
+      case "delayed":
+        return res.status(200).json({
+          ...response,
+          message: "Job is delayed and waiting to be processed.",
+        });
+
+      case "unknown":
+        return res.status(200).json({
+          ...response,
+          message: "Job status is unknown or the job may have been cancelled.",
+        });
+
+      default:
+        return res.status(200).json({
+          ...response,
+          message: "Job status is not recognized.",
+        });
+    }
   } catch (err) {
-    console.error(err);
+    console.error("Error retrieving job status:", err);
     return res.status(500).json({ error: "Error retrieving job status" });
   }
 };
+
+
 
 // Dummy health-check method
 export const healthCheck = (req: Request, res: Response) => {

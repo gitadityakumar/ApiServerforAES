@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { fetchUserById } from "../middlewares/auth";
+import verifyUserToken, { fetchUserById } from "../middlewares/auth";
 import { jobQueue } from "../queues/jobQueue";
 
 // Enqueue video processing job
@@ -8,9 +8,11 @@ export const processVideo = async (req: Request, res: Response) => {
     const Data = req.body.videoData;
     const videoData = Data[0];
     const rawData = req.body;
-    const usage  = rawData.usage;
+    const usage = rawData.usage;
     const model = rawData.model;
-  
+    const authHeader = req.headers["authorization"];
+    //  console.log(authHeader);
+
     if (!videoData || !videoData.userId) {
       return res.status(400).send("Bad Request: Missing video data or userID");
     }
@@ -21,18 +23,24 @@ export const processVideo = async (req: Request, res: Response) => {
       return res.status(401).send("Unauthorized");
     }
 
+    const token = await verifyUserToken(authHeader);
+    if (!token) {
+      console.log("Session invalid");
+      return res.status(401).send("Session invalid");
+    }
+
     // Add a job to the queue
     const job = await jobQueue.add(
       "video-job",
       {
         Data,
-        usage:usage,
-        model:model
+        usage: usage,
+        model: model,
       },
       {
         removeOnComplete: {
-          age:200,
-          count:1000,
+          age: 200,
+          count: 1000,
         },
       }
     );

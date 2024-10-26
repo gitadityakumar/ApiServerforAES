@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { raw, Request, Response } from "express";
 import verifyUserToken, { fetchUserById } from "../middlewares/auth";
 import { jobQueue } from "../queues/jobQueue";
 
@@ -8,8 +8,10 @@ export const processVideo = async (req: Request, res: Response) => {
     const Data = req.body.videoData;
     const videoData = Data[0];
     const rawData = req.body;
+     console.log(rawData);
     const usage = rawData.usage;
     const model = rawData.model;
+    const key = rawData.apikey;
     const authHeader = req.headers["authorization"];
     //  console.log(authHeader);
 
@@ -36,6 +38,7 @@ export const processVideo = async (req: Request, res: Response) => {
         Data,
         usage: usage,
         model: model,
+        key:key
       },
       {
         removeOnComplete: {
